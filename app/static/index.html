@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NYC Times Square AI Vision Agent</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Markdown parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar / Control Panel -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🗽</div>
+        <div class="brand-text">
+          <h1>Times Square AI</h1>
+          <span class="badge">Live Vision Agent</span>
+        </div>
+      </div>
+
+      <!-- Persona Selector Section -->
+      <div class="section-title">Analysis Persona</div>
+      <div class="persona-grid">
+        <button class="persona-card active" data-persona="general">
+          <span class="icon">✨</span>
+          <span class="label">General Overview</span>
+        </button>
+        <button class="persona-card" data-persona="weather">
+          <span class="icon">🌤️</span>
+          <span class="label">Weather & Atmosphere</span>
+        </button>
+        <button class="persona-card" data-persona="traffic">
+          <span class="icon">🚕</span>
+          <span class="label">Traffic & Flow</span>
+        </button>
+        <button class="persona-card" data-persona="event">
+          <span class="icon">🎭</span>
+          <span class="label">Event & Sighting Spotter</span>
+        </button>
+      </div>
+
+      <!-- Live Metric Widget -->
+      <div class="section-title">Live Vision Metrics</div>
+      <div class="metrics-widget">
+        <div class="metric-row">
+          <span class="metric-label">Estimated Crowd</span>
+          <span class="metric-value" id="metric-count">--</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Crowd Density</span>
+          <span class="metric-value badge-density" id="metric-density">Loading...</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Weather</span>
+          <span class="metric-value" id="metric-weather">--</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Last Ingestion</span>
+          <span class="metric-value" id="metric-time">--</span>
+        </div>
+        <button class="btn-secondary" id="btn-trigger-ingest">
+          🔄 Trigger Ingestion Now
+        </button>
+      </div>
+
+      <!-- Verification Multi-Camera Grid -->
+      <div class="section-title">4-Camera Live Grid</div>
+      <div class="image-card" id="image-card-container">
+        <div class="image-placeholder" id="image-placeholder">Loading camera feeds...</div>
+        <div class="camera-grid" id="snapshot-grid" style="display: none;">
+          <div class="camera-cell" data-cam="tsnorth4k">
+            <span class="cam-label">North 4K</span>
+            <img id="img-tsnorth4k" alt="North 4K Feed" src="" />
+          </div>
+          <div class="camera-cell" data-cam="tsrobo3">
+            <span class="cam-label">Robo 3</span>
+            <img id="img-tsrobo3" alt="Robo 3 Feed" src="" />
+          </div>
+          <div class="camera-cell" data-cam="tsstreet">
+            <span class="cam-label">Street Level</span>
+            <img id="img-tsstreet" alt="Street Level Feed" src="" />
+          </div>
+          <div class="camera-cell" data-cam="tsrobo1">
+            <span class="cam-label">Robo 1</span>
+            <img id="img-tsrobo1" alt="Robo 1 Feed" src="" />
+          </div>
+        </div>
+      </div>
+    </aside>
+
+
+    <!-- Main Chat Area -->
+    <main class="chat-main">
+      <header class="chat-header">
+        <div class="header-info">
+          <h2>Conversational Agent Interface</h2>
+          <p id="selected-persona-desc">Persona: General Overview (Balanced analysis of crowds, weather, and activity)</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-prompt-view" id="btn-view-prompt">
+            🔍 View Subagent Prompt
+          </button>
+          <div class="session-badge">
+            Session ID: <span id="session-id-display">Connecting...</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Message History Container -->
+      <div class="chat-history" id="chat-history">
+        <div class="message system-msg">
+          <div class="avatar">🗽</div>
+          <div class="msg-content">
+            Hello! I am your NYC Times Square AI agent. Every 5 minutes I analyze live camera snapshots into structured text records to answer your questions instantly without token lag. How can I help you today?
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Pills -->
+      <div class="quick-pills">
+        <button class="pill" data-prompt="Describe what Times Square looks like right now?">📷 Current Snapshot</button>
+        <button class="pill" data-prompt="Summarize crowd density and traffic trends over the last 24 hours.">📈 24-Hour Trend</button>
+        <button class="pill" data-prompt="How is the weather and ambient lighting in Times Square?">🌦️ Weather Summary</button>
+        <button class="pill" data-prompt="Capture a brand new live camera frame right now.">🔴 Live Capture</button>
+      </div>
+
+      <!-- Chat Input Box -->
+      <div class="chat-input-area">
+        <form id="chat-form">
+          <input type="text" id="user-input" placeholder="Ask anything about Times Square crowds, weather, or events..." autocomplete="off">
+          <button type="submit" id="send-btn" class="btn-primary">
+            <span>Send</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-7 20-4z"/></svg>
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for Prompt Visualization -->
+  <div class="modal-backdrop" id="prompt-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon" id="modal-subagent-icon">✨</span>
+          <div>
+            <h3 id="modal-subagent-name">general_agent</h3>
+            <span class="modal-subtitle" id="modal-subagent-role">Specialized Persona Subagent</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btn-close-prompt-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="prompt-meta-row">
+          <span class="meta-tag">Model: <code>gemini-3.6-flash</code></span>
+          <span class="meta-tag">ADK Agent: <code id="modal-meta-agent">general_agent</code></span>
+          <span class="meta-tag">Tools: <code>snapshot, history, live_camera</code></span>
+        </div>
+        <div class="prompt-code-container">
+          <div class="prompt-code-header">
+            <span>System Instruction (System Prompt)</span>
+            <button class="btn-copy-prompt" id="btn-copy-prompt">📋 Copy Prompt</button>
+          </div>
+          <pre id="modal-prompt-text" class="prompt-code-block"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
